@@ -32,11 +32,7 @@ type Banner struct {
 func (s *Service) All(ctx context.Context) ([]*Banner, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	for _, banner := range s.items {
-		return banner, nil
-	}
-
-	return nil, errors.New("item not found")
+	return s.items, nil
 }
 
 //ByID ...
@@ -65,9 +61,7 @@ func (s *Service) Save(ctx context.Context, item *Banner) (*Banner, error) {
 
 	for key, banner := range s.items {
 		if banner.ID == item.ID {
-			//если нашли то в слайс под индексом найденного выставим новый элемент
 			s.items[key] = item
-			//вернем баннер и ошибку nil
 			return item, nil
 		}
 	}
