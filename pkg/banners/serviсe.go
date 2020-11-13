@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+var startId int64
+
 //Service представляет собой сервис по управления баннерами
 type Service struct {
 	mu    sync.RWMutex
@@ -28,7 +30,13 @@ type Banner struct {
 
 //All ...
 func (s *Service) All(ctx context.Context) ([]*Banner, error) {
-	panic("not implemented")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, banner := range s.items {
+		return banner, nil
+	}
+
+	return nil, errors.New("item not found")
 }
 
 //ByID ...
@@ -46,10 +54,38 @@ func (s *Service) ByID(ctx context.Context, id int64) (*Banner, error) {
 
 //Save ...
 func (s *Service) Save(ctx context.Context, item *Banner) (*Banner, error) {
-	panic("not implemented")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if banner.ID == 0 {
+		startId++
+		item.ID=startId
+		s.items=append(s.items, banner)
+		return item, nil
+	}
+
+	for key, banner := range s.items {
+		if banner.ID == item.ID {
+			//если нашли то в слайс под индексом найденного выставим новый элемент
+			s.items[key] = item
+			//вернем баннер и ошибку nil
+			return item, nil
+		}
+	}
+
+
+	return nil, errors.New("item not found")
 }
 
 //RemoveByID ... Метод для удаления
 func (s *Service) RemoveByID(ctx context.Context, id int64) (*Banner, error) {
-	panic("not implemented")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for k, banner := range s.items {
+		if banner.ID == id {
+			s.items = append(s.items[:k], s.items[k+1:]...)
+			return banner, nil
+		}
+	}
+
+	return nil, errors.New("item not found")
 }
