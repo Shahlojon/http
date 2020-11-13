@@ -61,8 +61,8 @@ func (s *Server) handleGetBannerByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	_, err=writer.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	_, err=w.Write(data)
 	if err!=nil {
 		log.Print(err)
 	}
@@ -85,8 +85,8 @@ func (s *Server) handleGetAllBanners(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	_, err=writer.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	_, err=w.Write(data)
 	if err!=nil {
 		log.Print(err)
 	}
@@ -140,8 +140,8 @@ func (s *Server) handleSaveBanner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	_, err=writer.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	_, err=w.Write(data)
 	if err!=nil {
 		log.Print(err)
 	}
@@ -173,8 +173,8 @@ func (s *Server) handleRemoveByID(w http.ResponseWriter, r *http.Request) {
 		errorWriter(w, http.StatusInternalServerError)
 		return
 	}
-	writer.Header().Set("Content-Type", "application/json")
-	_, err=writer.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	_, err=w.Write(data)
 	if err!=nil {
 		log.Print(err)
 	}
