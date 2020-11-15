@@ -83,9 +83,10 @@ func (s *Service) Save(ctx context.Context, item *Banner, file multipart.File) (
 			} else {
 				item.Image = s.items[key].Image
 			}
+			s.items[key]=item
+			return item, nil
 		}
 	}
-
 
 	return nil, errors.New("item not found")
 }
