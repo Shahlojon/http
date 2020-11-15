@@ -1,6 +1,9 @@
 package banners
 
 import (
+	"io/ioutil"
+	"fmt"
+	"mime/multipart"
 	"context"
 	"errors"
 	"sync"
@@ -26,6 +29,7 @@ type Banner struct {
 	Content string
 	Button  string
 	Link    string
+	Image   string
 }
 
 //All ...
@@ -49,20 +53,36 @@ func (s *Service) ByID(ctx context.Context, id int64) (*Banner, error) {
 }
 
 //Save ...
-func (s *Service) Save(ctx context.Context, item *Banner) (*Banner, error) {
+func (s *Service) Save(ctx context.Context, item *Banner, file multipart.File) (*Banner, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if item.ID == 0 {
 		startId++
 		item.ID=startId
+
+		if item.Image != "" {
+			item.Image = fmt.Sprint(item.ID) + "." + item.Image
+			err := uploadFile(file, "./web/banners/"+item.Image)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		s.items=append(s.items, item)
 		return item, nil
 	}
 
 	for key, banner := range s.items {
 		if banner.ID == item.ID {
-			s.items[key] = item
-			return item, nil
+			if item.Image != "" {
+				item.Image = fmt.Sprint(item.ID) + "." + item.Image
+				err := uploadFile(file, "./web/banners/"+item.Image)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				item.Image = s.items[key].Image
+			}
 		}
 	}
 
@@ -82,4 +102,20 @@ func (s *Service) RemoveByID(ctx context.Context, id int64) (*Banner, error) {
 	}
 
 	return nil, errors.New("item not found")
+}
+
+func uploadFile(file multipart.File, path string) error {
+	var data, err = ioutil.ReadAll(file)
+
+	if err != nil {
+		return errors.New("not readble data")
+	}
+
+	err = ioutil.WriteFile(path, data, 0666)
+
+	if err != nil {
+		return errors.New("not saved from folder ")
+	}
+
+	return nil
 }
