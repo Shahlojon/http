@@ -126,13 +126,12 @@ func (s *Server) handleSaveBanner(w http.ResponseWriter, r *http.Request) {
 
 	file, fileHeader, err := r.FormFile("image")
 
-	if err != nil {
-		var name = strings.Split(fileHeader.Filename, '.')
+	if err == nil {
+		var name = strings.Split(fileHeader.Filename, ".")
 		item.Image=name[len(name)-1]
-		
 	}
 
-	data, err := s.bannerSvc.Save(r.Context(), item,file)
+	banner, err := s.bannerSvc.Save(r.Context(), item,file)
 
 	if err != nil {
 		log.Print(err)
@@ -140,7 +139,13 @@ func (s *Server) handleSaveBanner(w http.ResponseWriter, r *http.Request) {
 		errorWriter(w, http.StatusInternalServerError)
 		return
 	}
+	data,err:=json.Marshal(banner)
+	if err != nil {
+		log.Print(err)
 
+		errorWriter(w, http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_, err=w.Write(data)
 	if err!=nil {
